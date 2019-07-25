@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0
+        }
+
+        video {
+            width: 300px;
+            /* display: none; */
+        }
+
+        button {
+            position: absolute;
+            right: 0;
+            width: 100px;
+            height: 60px;
+            border: 1px solid #000;
+        }
+    </style>
+    <script src="./jquery.min.js"></script>
+    <script src="./reqrcode.min.js"></script>
+</head>
+
+<body>
+    <div class="box">
+        <img src='./test1.jpeg' width="100%">
+        <video src=""></video>
+        <div style="position:relative;">
+            <canvas id='canvas'></canvas>
+            <button class='video' style="top: 0">调取摄像头</button>
+            <button class='shot' style="bottom: 0">拍照</button>
+        </div>
+    </div>
+
+    <script>
+        // 视频大小
+        var constraints = { audio: true, video: { width: 200, height: 200 } };
+
+        function decodeQRcode(imageSrc) {
+            if (imageSrc) {
+                // 解析二维码
+                qrcode.decode(imageSrc);
+                qrcode.callback = function (imgMsg) {
+                    console.log(imgMsg);
+                    alert(imgMsg)
+                }
+            }
+        }
+
+        $('.video').on('click', function () {
+            // 开启视频
+            navigator.mediaDevices.getUserMedia(constraints).then(function (mediaStream) {
+                console.log('getUserMedia:', mediaStream)
+                var video = document.querySelector('video');
+                video.srcObject = mediaStream;
+                video.onloadedmetadata = function (e) {
+                    video.play();
+                };
+
+                // 使用canvas进行拍照
+                var canvas = document.getElementById('canvas')
+                $('.shot').on('click', function () {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+
+                    console.log(canvas.width, canvas.height);
+
+                    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    var imageData = canvas.toDataURL("image/png");
+
+                    // 解析二维码
+                    decodeQRcode(imageData);
+                })
+
+            }).catch(function (err) {
+                console.log(err.name + ": " + err.message);
+                alert(err.name + ": " + err.message)
+            });
+        });
+
+        window.onload = function () {
+            // 长按图片识别二维码
+            var image = $('img');
+            var imageSrc = image.attr('src');
+
+            console.log(imageSrc)
+
+            var timer = null, isLongClick = false;
+            image.on('touchstart', function () {
+                console.log('start');
+                timer = setTimeout(function () {
+                    clearTimeout(timer);
+                    isLongClick = true;
+                    // 执行长按代码
+                    console.log('长按事件');
+                    decodeQRcode(imageSrc);
+                }, 700)
+                return false;
+            })
+
+            image.on('touchend', function () {
+                console.log('end');
+                clearTimeout(timer);
+                if (isLongClick) {
+                    isLongClick = false;
+                } else {
+                    // 执行点击事件
+                    console.log('点击事件');
+                }
+                return false;
+            })
+
+        }
+
+    </script>
+</body>
+
+</html>
