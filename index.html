@@ -31,7 +31,7 @@
 
 <body>
     <div class="box">
-        <img src='./test1.jpeg' width="100%">
+        <img src='./test.jpeg' width="100%">
         <video src=""></video>
         <div style="position:relative;">
             <canvas id='canvas'></canvas>
@@ -56,35 +56,37 @@
         }
 
         $('.video').on('click', function () {
+            // console.log(navigator)
             // 开启视频
-            navigator.mediaDevices.getUserMedia(constraints).then(function (mediaStream) {
-                console.log('getUserMedia:', mediaStream)
-                var video = document.querySelector('video');
-                video.srcObject = mediaStream;
-                video.onloadedmetadata = function (e) {
-                    video.play();
-                };
+            if (navigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+                navigator.mediaDevices.getUserMedia(constraints).then(function (mediaStream) {
+                    console.log('getUserMedia:', mediaStream)
+                    var video = document.querySelector('video');
+                    video.srcObject = mediaStream;
+                    video.onloadedmetadata = function (e) {
+                        video.play();
+                    };
 
-                // 使用canvas进行拍照
-                var canvas = document.getElementById('canvas')
-                $('.shot').on('click', function () {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
+                    // 使用canvas进行拍照
+                    var canvas = document.getElementById('canvas')
+                    $('.shot').on('click', function () {
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
 
-                    console.log(canvas.width, canvas.height);
+                        console.log(canvas.width, canvas.height);
 
-                    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
 
-                    var imageData = canvas.toDataURL("image/png");
+                        var imageData = canvas.toDataURL("image/png");
 
-                    // 解析二维码
-                    decodeQRcode(imageData);
-                })
+                        // 解析二维码
+                        decodeQRcode(imageData);
+                    })
 
-            }).catch(function (err) {
-                console.log(err.name + ": " + err.message);
-                alert(err.name + ": " + err.message)
-            });
+                }).catch(function (err) {
+                    console.log(err.name + ": " + err.message);
+                    alert(err.name + ": " + err.message)
+                });
         });
 
         window.onload = function () {
