@@ -24,6 +24,27 @@
             height: 60px;
             border: 1px solid #000;
         }
+
+        .jump_mask {
+            display: none;
+            position: fixed;
+            top:0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        .qrcode {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            font-size: 18px;
+            background-color: #fff;
+        }
     </style>
     <script src="./jquery.min.js"></script>
     <script src="./reqrcode.min.js"></script>
@@ -32,11 +53,14 @@
 <body>
     <div class="box">
         <img src='./test.jpeg' width="100%">
-        <video src=""></video>
+        <!-- <video src=""></video>
         <div style="position:relative;">
             <canvas id='canvas'></canvas>
             <button class='video' style="top: 0">调取摄像头</button>
             <button class='shot' style="bottom: 0">拍照</button>
+        </div> -->
+        <div class="jump_mask">
+            <a class="qrcode">识别二维码</a>
         </div>
     </div>
 
@@ -49,8 +73,11 @@
                 // 解析二维码
                 qrcode.decode(imageSrc);
                 qrcode.callback = function (imgMsg) {
+                    $('.jump_mask').css('display', 'block');
+                    $('.qrcode').attr('href', imgMsg);
                     console.log(imgMsg);
-                    alert(imgMsg)
+                    // alert(imgMsg)
+
                 }
             }
         }
@@ -58,13 +85,15 @@
         $('.video').on('click', function () {
             // console.log(navigator)
             // 开启视频
-            if (navigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+            if (navigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
                 navigator.mediaDevices.getUserMedia(constraints).then(function (mediaStream) {
                     console.log('getUserMedia:', mediaStream)
                     var video = document.querySelector('video');
                     video.srcObject = mediaStream;
                     video.onloadedmetadata = function (e) {
-                        video.play();
+                        setTimeout(function () {
+                            video.play();
+                        }, 300)
                     };
 
                     // 使用canvas进行拍照
@@ -87,6 +116,7 @@
                     console.log(err.name + ": " + err.message);
                     alert(err.name + ": " + err.message)
                 });
+            }
         });
 
         window.onload = function () {
